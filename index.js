@@ -3,6 +3,7 @@ const {prompt} = require('inquirer');
 const db = require('./db');
 const cTable= require('console.table');
 
+//the first question to start and added the choices and the list to can choice
 const startQuestion = {
     type: "list",
     name: "start",
@@ -23,8 +24,10 @@ const depaQuestion = {
     name: "departmentAdd",
     message: "What is the name of the department?"
 }
+//Implements an interactive menu
 const init = async () => {
     const answers = await prompt(startQuestion)
+    //with the switch allows the user to perform different actions
     switch (answers.start) {
         case "View all employees":
             viewAllEmployees()
@@ -56,12 +59,14 @@ const init = async () => {
 
 
 function viewAllEmployees() {
-    db.promise().query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as department_name, 
-    CONCAT(manager.first_name, ' ', manager.last_name) as manager_name
-    FROM employee
-    LEFT JOIN role ON employee.role_id = role.id
-    LEFT JOIN department ON role.department_id = department.id
-    LEFT JOIN employee manager ON employee.manager_id = manager.id`)
+    db.promise().query(`
+                        SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name as department_name, 
+                        CONCAT(manager.first_name, ' ', manager.last_name) as manager_name
+                        FROM employee
+                        LEFT JOIN role ON employee.role_id = role.id
+                        LEFT JOIN department ON role.department_id = department.id
+                        LEFT JOIN employee manager ON employee.manager_id = manager.id
+                    `) // LEFT JOIN is used so that the names can be displayed and not just the id
         .then(data => {
             console.table(data[0])
             init()
@@ -70,10 +75,10 @@ function viewAllEmployees() {
 
 function viewAllRoles() {
     db.promise().query(`
-        SELECT role.id, role.title, role.salary, department.name as department_name
-        FROM role
-        LEFT JOIN department ON role.department_id = department.id
-  `) 
+                        SELECT role.id, role.title, role.salary, department.name as department_name
+                        FROM role
+                        LEFT JOIN department ON role.department_id = department.id
+                     `) //LEFT JOIN is used so that the names can be displayed and not just the id
         .then(data => {
             console.table(data[0])
             init()
@@ -81,7 +86,7 @@ function viewAllRoles() {
 }
 
 function viewAllDepartments() {
-    db.promise().query("SELECT * FROM department")
+    db.promise().query("SELECT * FROM department") //Everything is selected from the schema.sql
         .then(data => {
             console.table(data[0])
             init()
@@ -93,7 +98,7 @@ function addDepartment() {
     prompt(depaQuestion)
         .then(answer => {
 
-            return db.promise().query("INSERT INTO department SET ?", {
+            return db.promise().query("INSERT INTO department SET ?", { //INSERT INTO is used to add a new record to the table
                 name: answer.departmentAdd
             })
 
@@ -149,7 +154,7 @@ function addEmployee() {
             db.promise().query("SELECT * FROM employee")
                 .then(employeeData => {
                     const roleOptions = roleData[0].map(role => ({ name: role.title, value: role.id }))
-                    const employeeOptions = employeeData[0].map(employee => ({ name: employee.first_name + " " + employee.last_name, value: employee.id }))
+                    const employeeOptions = employeeData[0].map(employee => ({ name: employee.first_name + " " + employee.last_name, value: employee.id })) //New arrays of objects are created using map() from the data in the database.
                     const addEmployeeQuestions = [
                         {
                             type: "input",
