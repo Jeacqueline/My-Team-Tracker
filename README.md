@@ -15,9 +15,11 @@
         npm install
 - Configure the database 
     " 
-        DB_USER=root
-        DB_PASSWORD=
-        DB_DATABASE=employee_db
+        DB_HOST=''
+        DB_NAME='employee_db'
+        DB_PASSWORD='XXXXXXXXXX'
+        DB_USER='root'
+        DB_PORT=''
     "
 - Start the index:
     node index.js
